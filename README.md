@@ -18,7 +18,7 @@
 
 ---
 
-## 🌌 Mission Briefing
+## 🌌 Intergalactic Banking API Mission
 
 Welcome to the **AI-Powered API & MCP Bootcamp** — a 60-minute hands-on workshop by [Postman](https://www.postman.com/) where you'll build and test an end-to-end **Intergalactic Banking API**, mastering:
 
