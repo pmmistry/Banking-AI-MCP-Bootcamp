@@ -1,0 +1,1309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI-Powered API &amp; MCP Bootcamp | Postman</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --orange: #FF6C37;
+      --purple: #8B5CF6;
+      --teal: #06B6D4;
+      --pink: #EC4899;
+      --gold: #F59E0B;
+      --green: #10B981;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #07000F;
+      color: #E2E8F0;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── PROGRESS BAR ── */
+    #progress-fill {
+      height: 3px;
+      background: linear-gradient(90deg, #FF6C37, #EC4899, #8B5CF6, #06B6D4);
+      background-size: 200% 100%;
+      animation: shimmer-bar 3s linear infinite;
+      transition: width 0.5s ease;
+    }
+    @keyframes shimmer-bar {
+      0% { background-position: 200% center; }
+      100% { background-position: -200% center; }
+    }
+
+    /* ── HEXAGON ── */
+    .hexagon {
+      clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    }
+
+    /* ── GLASS CARD ── */
+    .glass-card {
+      background: rgba(12, 3, 25, 0.85);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(139, 92, 246, 0.18);
+    }
+
+    /* ── WORKFLOW STEPS ACCORDION ── */
+    .wf-steps {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.55s ease;
+    }
+    .wf-steps.open { max-height: 9999px; }
+
+    .chevron { transition: transform 0.3s ease; }
+    .chevron.rotated { transform: rotate(180deg); }
+
+    /* ── STEP ITEMS ── */
+    .step-item {
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px;
+      transition: all 0.25s ease;
+    }
+    .step-item:hover { background: rgba(255,255,255,0.03); }
+    .step-item.done {
+      border-color: rgba(255,108,55,0.25);
+      background: rgba(255,108,55,0.04);
+    }
+    .step-item.done .step-title { opacity: 0.5; }
+
+    /* ── CHECKBOXES ── */
+    .step-check {
+      appearance: none;
+      width: 22px; height: 22px;
+      border: 2px solid rgba(255,108,55,0.4);
+      border-radius: 50%;
+      cursor: pointer;
+      position: relative;
+      flex-shrink: 0;
+      transition: all 0.2s ease;
+      margin-top: 2px;
+    }
+    .step-check:hover { border-color: #FF6C37; }
+    .step-check:checked { background: #FF6C37; border-color: #FF6C37; }
+    .step-check:checked::before {
+      content: '✓';
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      color: white;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    /* ── PROMPT BOXES ── */
+    .agent-box {
+      background: rgba(0,0,0,0.45);
+      border-left: 3px solid #FF6C37;
+      border-radius: 0 8px 8px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+      line-height: 1.6;
+    }
+    .claude-box {
+      background: rgba(0,0,0,0.45);
+      border-left: 3px solid #8B5CF6;
+      border-radius: 0 8px 8px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+      line-height: 1.6;
+    }
+    .code-box {
+      background: rgba(0,0,0,0.6);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      line-height: 1.7;
+    }
+    .tip-box {
+      background: rgba(6,182,212,0.07);
+      border: 1px solid rgba(6,182,212,0.2);
+      border-radius: 8px;
+    }
+    .note-box {
+      background: rgba(245,158,11,0.07);
+      border: 1px solid rgba(245,158,11,0.2);
+      border-radius: 8px;
+    }
+
+    /* ── COPY BUTTON ── */
+    .copy-btn {
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: rgba(255,255,255,0.5);
+      border-radius: 5px;
+      padding: 2px 10px;
+      font-size: 11px;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .copy-btn:hover { background: rgba(255,108,55,0.15); border-color: rgba(255,108,55,0.4); color: #FF6C37; }
+    .copy-btn.copied { background: rgba(16,185,129,0.15); border-color: rgba(16,185,129,0.4); color: #10B981; }
+
+    /* ── RESOURCE CARDS ── */
+    .res-card {
+      background: rgba(255,255,255,0.035);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      text-decoration: none;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 16px;
+      transition: all 0.25s ease;
+    }
+    .res-card:hover {
+      background: rgba(255,108,55,0.07);
+      border-color: rgba(255,108,55,0.3);
+      transform: translateY(-2px);
+    }
+
+    /* ── GRADIENT TEXTS ── */
+    .text-orange { color: #FF6C37; }
+    .grad-orange {
+      background: linear-gradient(135deg, #FF6C37, #FF3D87);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .grad-full {
+      background: linear-gradient(135deg, #FF6C37, #EC4899, #8B5CF6, #06B6D4);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+
+    /* ── ANIMATIONS ── */
+    @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-14px); } }
+    @keyframes spin-slow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    @keyframes spin-rev { from { transform: rotate(0deg); } to { transform: rotate(-360deg); } }
+    @keyframes pulse-glow {
+      0%,100% { box-shadow: 0 0 20px rgba(255,108,55,0.35), 0 0 60px rgba(139,92,246,0.2); }
+      50% { box-shadow: 0 0 40px rgba(255,108,55,0.7), 0 0 100px rgba(139,92,246,0.4); }
+    }
+    @keyframes fade-up { from { opacity:0; transform: translateY(24px); } to { opacity:1; transform: translateY(0); } }
+    @keyframes confetti-fall {
+      from { transform: translateY(-50px) rotate(0deg); opacity: 1; }
+      to { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+    }
+
+    .anim-float { animation: float 4s ease-in-out infinite; }
+    .anim-spin { animation: spin-slow 14s linear infinite; }
+    .anim-spin-rev { animation: spin-rev 9s linear infinite; }
+    .anim-pulse { animation: pulse-glow 3s ease-in-out infinite; }
+    .anim-fade-up { animation: fade-up 0.7s ease forwards; }
+
+    /* ── ORBIT RING ── */
+    .orbit-ring {
+      position: absolute;
+      border-radius: 50%;
+      border: 1.5px solid rgba(255,255,255,0.07);
+    }
+
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: #07000F; }
+    ::-webkit-scrollbar-thumb { background: #4C1D95; border-radius: 3px; }
+
+    /* ── WORKFLOW COLOR ACCENTS ── */
+    .w1 { color: #FF6C37; }
+    .w2 { color: #8B5CF6; }
+    .w3 { color: #06B6D4; }
+    .w4 { color: #F59E0B; }
+    .wc { color: #10B981; }
+    .w1-border { border-left: 3px solid #FF6C37; }
+    .w2-border { border-left: 3px solid #8B5CF6; }
+    .w3-border { border-left: 3px solid #06B6D4; }
+    .w4-border { border-left: 3px solid #F59E0B; }
+    .wc-border { border-left: 3px solid #10B981; }
+
+    /* ── CONFETTI ── */
+    .confetti-piece {
+      position: fixed;
+      width: 9px; height: 9px;
+      border-radius: 2px;
+      pointer-events: none;
+      z-index: 9999;
+      animation: confetti-fall linear forwards;
+    }
+
+    /* ── PREREQ PILL ── */
+    .prereq-pill {
+      background: rgba(255,108,55,0.1);
+      border: 1px solid rgba(255,108,55,0.25);
+      border-radius: 999px;
+      padding: 8px 18px;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.9rem;
+    }
+
+    /* ── MOBILE ── */
+    @media (max-width: 640px) {
+      .hero-title { font-size: 2.8rem !important; }
+    }
+
+    /* ── SECTION DIVIDER ── */
+    .section-divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(139,92,246,0.3), transparent);
+      margin: 0 auto;
+      max-width: 900px;
+    }
+
+    /* ── BADGE ── */
+    .postman-badge {
+      background: linear-gradient(135deg, rgba(255,108,55,0.12), rgba(139,92,246,0.12));
+      border: 1px solid rgba(255,108,55,0.3);
+      border-radius: 999px;
+      padding: 6px 16px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    /* ── STEP NUMBER CIRCLE ── */
+    .step-num {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 700;
+      flex-shrink: 0;
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- ═══════════════════════════════════════
+     STICKY HEADER + PROGRESS BAR
+═══════════════════════════════════════ -->
+<header id="top-nav" style="position:fixed;top:0;left:0;right:0;z-index:50;background:rgba(7,0,15,0.92);backdrop-filter:blur(16px);border-bottom:1px solid rgba(139,92,246,0.12);">
+  <div style="max-width:1280px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;">
+    <!-- Logo -->
+    <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
+      <div class="hexagon" style="width:32px;height:32px;background:#FF6C37;display:flex;align-items:center;justify-content:center;font-weight:900;color:white;font-size:14px;">P</div>
+      <span style="font-weight:600;font-size:0.82rem;color:rgba(255,255,255,0.7);display:none;" class="sm-show">AI-Powered API &amp; MCP Bootcamp</span>
+    </div>
+    <!-- Progress -->
+    <div style="display:flex;align-items:center;gap:10px;flex:1;max-width:380px;">
+      <span style="font-size:0.7rem;color:rgba(255,255,255,0.35);white-space:nowrap;">Mission Progress</span>
+      <div style="flex:1;height:4px;background:rgba(255,255,255,0.08);border-radius:4px;overflow:hidden;">
+        <div id="progress-fill" style="width:0%;height:100%;"></div>
+      </div>
+      <span id="progress-counter" style="font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:rgba(255,255,255,0.5);white-space:nowrap;">0 / 15</span>
+    </div>
+    <!-- Nav links -->
+    <nav style="display:flex;gap:16px;flex-shrink:0;">
+      <a href="#workflow-1" style="font-size:0.72rem;color:rgba(255,255,255,0.4);text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='#FF6C37'" onmouseout="this.style.color='rgba(255,255,255,0.4)'">W1</a>
+      <a href="#workflow-2" style="font-size:0.72rem;color:rgba(255,255,255,0.4);text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='#8B5CF6'" onmouseout="this.style.color='rgba(255,255,255,0.4)'">W2</a>
+      <a href="#workflow-3" style="font-size:0.72rem;color:rgba(255,255,255,0.4);text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='#06B6D4'" onmouseout="this.style.color='rgba(255,255,255,0.4)'">W3</a>
+      <a href="#workflow-4" style="font-size:0.72rem;color:rgba(255,255,255,0.4);text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='#F59E0B'" onmouseout="this.style.color='rgba(255,255,255,0.4)'">W4</a>
+    </nav>
+  </div>
+</header>
+
+
+<!-- ═══════════════════════════════════════
+     HERO SECTION
+═══════════════════════════════════════ -->
+<section style="position:relative;min-height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden;padding-top:64px;">
+  <canvas id="hero-canvas" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;"></canvas>
+
+  <!-- Background glow blobs -->
+  <div style="position:absolute;inset:0;background:radial-gradient(ellipse 60% 60% at 20% 50%, rgba(139,92,246,0.12) 0%, transparent 70%);pointer-events:none;"></div>
+  <div style="position:absolute;inset:0;background:radial-gradient(ellipse 50% 50% at 80% 60%, rgba(255,108,55,0.09) 0%, transparent 70%);pointer-events:none;"></div>
+
+  <div style="position:relative;z-index:10;max-width:1280px;margin:0 auto;padding:60px 24px;display:flex;flex-wrap:wrap;align-items:center;gap:48px;">
+
+    <!-- Left: Text -->
+    <div style="flex:1;min-width:300px;" class="anim-fade-up">
+      <div class="postman-badge" style="margin-bottom:24px;">
+        <span>🚀</span>
+        <span style="color:#FF6C37;">Intergalactic Banking Workshop</span>
+      </div>
+
+      <h1 style="font-size:clamp(2.5rem, 6vw, 5rem);font-weight:900;line-height:1.08;margin-bottom:24px;">
+        <span style="color:white;">AI-Powered</span><br/>
+        <span class="grad-orange">API &amp; MCP</span><br/>
+        <span style="color:white;">Bootcamp</span>
+      </h1>
+
+      <p style="font-size:1rem;color:rgba(255,255,255,0.55);max-width:520px;line-height:1.75;margin-bottom:28px;">
+        Build and test an <strong style="color:#FF6C37;">Intergalactic Banking API</strong> end to end. Master API testing, automation with <strong style="color:#FF6C37;">Postman Agent Mode</strong>, and building MCP servers to track transactions between astronauts. 60 minutes. Hands-on. No LLM experience required.
+      </p>
+
+      <!-- Stats pills -->
+      <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:32px;">
+        <span style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:7px 14px;font-size:0.82rem;display:flex;align-items:center;gap:6px;">⏱️ <strong>60 Minutes</strong></span>
+        <span style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:7px 14px;font-size:0.82rem;display:flex;align-items:center;gap:6px;">🔬 <strong>Hands-On</strong></span>
+        <span style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:7px 14px;font-size:0.82rem;display:flex;align-items:center;gap:6px;">✨ <strong>No LLM Exp. Required</strong></span>
+        <span style="background:rgba(255,108,55,0.1);border:1px solid rgba(255,108,55,0.25);border-radius:8px;padding:7px 14px;font-size:0.82rem;display:flex;align-items:center;gap:6px;">🏷️ <strong style="color:#FF6C37;">#PostmanBootcamp</strong></span>
+      </div>
+
+      <!-- CTAs -->
+      <div style="display:flex;flex-wrap:wrap;gap:12px;">
+        <a href="#workflow-1" style="background:linear-gradient(135deg,#FF6C37,#EC4899);color:white;padding:13px 28px;border-radius:10px;font-weight:700;font-size:0.9rem;text-decoration:none;display:inline-flex;align-items:center;gap:6px;transition:transform 0.2s,box-shadow 0.2s;box-shadow:0 4px 20px rgba(255,108,55,0.35);" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 30px rgba(255,108,55,0.5)'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 20px rgba(255,108,55,0.35)'">
+          Begin Mission <span>→</span>
+        </a>
+        <a href="#resources" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.14);color:rgba(255,255,255,0.8);padding:13px 28px;border-radius:10px;font-weight:600;font-size:0.9rem;text-decoration:none;transition:all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='rgba(255,255,255,0.06)'">
+          View Resources
+        </a>
+      </div>
+    </div>
+
+    <!-- Right: Orbital icon cluster -->
+    <div style="flex-shrink:0;display:flex;align-items:center;justify-content:center;" class="anim-float">
+      <div style="position:relative;width:280px;height:280px;">
+        <!-- Orbit rings -->
+        <div class="orbit-ring anim-spin" style="inset:0;border-color:rgba(255,108,55,0.12);"></div>
+        <div class="orbit-ring anim-spin-rev" style="inset:24px;border-color:rgba(139,92,246,0.15);"></div>
+        <div class="orbit-ring" style="inset:54px;border-color:rgba(6,182,212,0.1);"></div>
+
+        <!-- Orbit dots -->
+        <div style="position:absolute;width:10px;height:10px;background:#FF6C37;border-radius:50%;top:calc(50% - 5px);left:-5px;"></div>
+        <div style="position:absolute;width:10px;height:10px;background:#06B6D4;border-radius:50%;top:calc(50% - 5px);right:-5px;"></div>
+        <div style="position:absolute;width:8px;height:8px;background:#F59E0B;border-radius:50%;top:-4px;left:calc(50% - 4px);"></div>
+        <div style="position:absolute;width:8px;height:8px;background:#10B981;border-radius:50%;bottom:-4px;left:calc(50% - 4px);"></div>
+
+        <!-- Central hex -->
+        <div style="position:absolute;inset:74px;">
+          <div class="hexagon anim-pulse" style="width:100%;height:100%;background:linear-gradient(135deg,#FF6C37,#EC4899,#8B5CF6);display:flex;align-items:center;justify-content:center;">
+            <span style="font-size:2.2rem;">✦</span>
+          </div>
+        </div>
+
+        <!-- Corner icons -->
+        <div style="position:absolute;top:-8px;left:-8px;">
+          <div class="hexagon" style="width:56px;height:56px;background:#FF6C37;display:flex;align-items:center;justify-content:center;font-weight:900;color:white;font-size:20px;">M</div>
+        </div>
+        <div style="position:absolute;top:-8px;right:-8px;">
+          <div style="width:54px;height:54px;background:rgba(139,92,246,0.25);border:1px solid rgba(139,92,246,0.5);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:26px;">🏦</div>
+        </div>
+        <div style="position:absolute;bottom:-8px;left:-8px;">
+          <div style="width:54px;height:54px;background:rgba(255,108,55,0.15);border:1px solid rgba(255,108,55,0.4);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#FF6C37;font-family:'JetBrains Mono',monospace;">&lt;/&gt;</div>
+        </div>
+        <div style="position:absolute;bottom:-8px;right:-8px;">
+          <div style="width:54px;height:54px;background:rgba(6,182,212,0.12);border:1px solid rgba(6,182,212,0.3);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:26px;">🤖</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scroll hint -->
+  <div style="position:absolute;bottom:24px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;color:rgba(255,255,255,0.25);font-size:0.72rem;">
+    <span>Scroll to begin</span>
+    <div style="width:1.5px;height:32px;background:linear-gradient(to bottom, rgba(255,108,55,0.5),transparent);border-radius:2px;"></div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════
+     KEY TAKEAWAYS
+═══════════════════════════════════════ -->
+<section style="padding:80px 24px;max-width:1280px;margin:0 auto;">
+  <div style="text-align:center;margin-bottom:48px;">
+    <h2 style="font-size:2rem;font-weight:800;color:white;margin-bottom:8px;">Key Takeaways</h2>
+    <p style="color:rgba(255,255,255,0.45);font-size:0.9rem;">What you'll accomplish in 60 minutes</p>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;">
+    <div class="glass-card" style="border-radius:16px;padding:24px;">
+      <div style="width:48px;height:48px;background:rgba(255,108,55,0.12);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:16px;">⚡</div>
+      <h3 style="font-weight:700;color:white;margin-bottom:8px;font-size:1rem;">Agent Mode Power</h3>
+      <p style="font-size:0.82rem;color:rgba(255,255,255,0.45);line-height:1.6;">Use Postman Agent Mode to accelerate API design, testing, and development with AI copilots always available.</p>
+    </div>
+    <div class="glass-card" style="border-radius:16px;padding:24px;">
+      <div style="width:48px;height:48px;background:rgba(139,92,246,0.12);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:16px;">🔄</div>
+      <h3 style="font-weight:700;color:white;margin-bottom:8px;font-size:1rem;">Code ↔ Collection</h3>
+      <p style="font-size:0.82rem;color:rgba(255,255,255,0.45);line-height:1.6;">Move confidently between code-first and collection-first workflows using AI assistance to bridge the gap.</p>
+    </div>
+    <div class="glass-card" style="border-radius:16px;padding:24px;">
+      <div style="width:48px;height:48px;background:rgba(6,182,212,0.12);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:16px;">🔌</div>
+      <h3 style="font-weight:700;color:white;margin-bottom:8px;font-size:1rem;">MCP Integration</h3>
+      <p style="font-size:0.82rem;color:rgba(255,255,255,0.45);line-height:1.6;">Build and validate MCP-enabled services compatible with modern LLM tooling and autonomous AI agents.</p>
+    </div>
+    <div class="glass-card" style="border-radius:16px;padding:24px;">
+      <div style="width:48px;height:48px;background:rgba(16,185,129,0.12);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:16px;">🚀</div>
+      <h3 style="font-weight:700;color:white;margin-bottom:8px;font-size:1rem;">Repeatable Workflow</h3>
+      <p style="font-size:0.82rem;color:rgba(255,255,255,0.45);line-height:1.6;">Apply a Postman-centric workflow to modernize APIs for an AI-first future — techniques you can use immediately.</p>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+
+<!-- ═══════════════════════════════════════
+     RESOURCES
+═══════════════════════════════════════ -->
+<section id="resources" style="padding:72px 24px;max-width:1280px;margin:0 auto;">
+  <div style="text-align:center;margin-bottom:40px;">
+    <h2 style="font-size:1.75rem;font-weight:800;color:white;margin-bottom:8px;">Workshop Resources</h2>
+    <p style="color:rgba(255,255,255,0.4);font-size:0.85rem;">Everything you need — open these before starting</p>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;">
+    <a href="https://github.com/Postman-Devrel/Banking-API-Demo" target="_blank" class="res-card">
+      <span style="font-size:24px;flex-shrink:0;">📦</span>
+      <div>
+        <div style="font-weight:600;color:white;font-size:0.9rem;margin-bottom:3px;">Banking API Repo</div>
+        <div style="font-size:0.78rem;color:rgba(255,255,255,0.4);">github.com/Postman-Devrel/Banking-API-Demo</div>
+      </div>
+    </a>
+    <a href="https://postman.com/devrel/ai-powered-api-mcp-bootcamp" target="_blank" class="res-card">
+      <span style="font-size:24px;flex-shrink:0;">🌐</span>
+      <div>
+        <div style="font-weight:600;color:white;font-size:0.9rem;margin-bottom:3px;">Postman Bootcamp Workspace</div>
+        <div style="font-size:0.78rem;color:rgba(255,255,255,0.4);">postman.com/devrel/ai-powered-api-mcp-bootcamp</div>
+      </div>
+    </a>
+    <a href="https://academy.postman.com/meet-agent-mode" target="_blank" class="res-card">
+      <span style="font-size:24px;flex-shrink:0;">🎓</span>
+      <div>
+        <div style="font-weight:600;color:white;font-size:0.9rem;margin-bottom:3px;">Meet Agent Mode</div>
+        <div style="font-size:0.78rem;color:rgba(255,255,255,0.4);">academy.postman.com/meet-agent-mode</div>
+      </div>
+    </a>
+    <a href="https://postman.com/templates/agent-mode/" target="_blank" class="res-card">
+      <span style="font-size:24px;flex-shrink:0;">📚</span>
+      <div>
+        <div style="font-weight:600;color:white;font-size:0.9rem;margin-bottom:3px;">Agent Mode Prompt Library</div>
+        <div style="font-size:0.78rem;color:rgba(255,255,255,0.4);">postman.com/templates/agent-mode</div>
+      </div>
+    </a>
+    <a href="https://github.com/postmanlabs/postman-mcp-server" target="_blank" class="res-card">
+      <span style="font-size:24px;flex-shrink:0;">⚙️</span>
+      <div>
+        <div style="font-weight:600;color:white;font-size:0.9rem;margin-bottom:3px;">Postman MCP Server</div>
+        <div style="font-size:0.78rem;color:rgba(255,255,255,0.4);">github.com/postmanlabs/postman-mcp-server</div>
+      </div>
+    </a>
+    <a href="https://github.com/Postman-Devrel/postman-claude-code-plugin" target="_blank" class="res-card">
+      <span style="font-size:24px;flex-shrink:0;">🔧</span>
+      <div>
+        <div style="font-weight:600;color:white;font-size:0.9rem;margin-bottom:3px;">Postman Claude Code Plugin</div>
+        <div style="font-size:0.78rem;color:rgba(255,255,255,0.4);">github.com/Postman-Devrel/postman-claude-code-plugin</div>
+      </div>
+    </a>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+
+<!-- ═══════════════════════════════════════
+     PREREQUISITES
+═══════════════════════════════════════ -->
+<section style="padding:64px 24px;max-width:900px;margin:0 auto;">
+  <div style="text-align:center;margin-bottom:32px;">
+    <h2 style="font-size:1.75rem;font-weight:800;color:white;margin-bottom:8px;">Prerequisites</h2>
+    <p style="color:rgba(255,255,255,0.4);font-size:0.85rem;">Complete this before the workshop begins</p>
+  </div>
+  <div style="display:flex;justify-content:center;">
+    <a href="https://www.postman.com/" target="_blank" class="prereq-pill" style="text-decoration:none;color:white;">
+      <span style="font-size:20px;">✅</span>
+      <span style="font-weight:500;">Create a <strong style="color:#FF6C37;">Postman Account</strong> at postman.com</span>
+      <span style="color:rgba(255,255,255,0.3);font-size:0.8rem;">→</span>
+    </a>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+
+<!-- ═══════════════════════════════════════
+     WORKFLOW 1 — IMPORT API SPEC
+═══════════════════════════════════════ -->
+<section id="workflow-1" style="padding:40px 24px;max-width:900px;margin:0 auto;">
+  <div class="glass-card" style="border-radius:20px;overflow:hidden;border-left:4px solid #FF6C37;">
+    <!-- Header -->
+    <div onclick="toggleWF('wf1')" style="padding:24px 28px;display:flex;align-items:center;gap:16px;cursor:pointer;user-select:none;">
+      <div style="width:56px;height:56px;background:rgba(255,108,55,0.12);border:1px solid rgba(255,108,55,0.25);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;">📥</div>
+      <div style="flex:1;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+          <span style="font-size:0.7rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#FF6C37;">Workflow 1</span>
+          <span style="font-size:0.7rem;padding:2px 8px;border-radius:4px;background:rgba(255,108,55,0.12);color:#FF6C37;">2 steps</span>
+          <span id="wf1-done-badge" style="font-size:0.7rem;padding:2px 8px;border-radius:4px;background:rgba(16,185,129,0.1);color:#10B981;display:none;">✓ Done</span>
+        </div>
+        <h2 style="font-size:1.25rem;font-weight:800;color:white;">Import the API Spec into Postman</h2>
+      </div>
+      <div id="wf1-chevron" class="chevron" style="color:rgba(255,255,255,0.3);font-size:18px;">▼</div>
+    </div>
+
+    <!-- Steps -->
+    <div id="wf1" class="wf-steps open" style="padding:0 28px 28px;">
+
+      <!-- Step 1 -->
+      <div class="step-item" id="si-w1s1" style="padding:20px;margin-bottom:12px;">
+        <div style="display:flex;align-items:flex-start;gap:14px;">
+          <input type="checkbox" class="step-check" id="w1s1" onchange="handleCheck(this,'w1s1')">
+          <div style="flex:1;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+              <div class="step-num" style="background:rgba(255,108,55,0.15);color:#FF6C37;">1</div>
+              <h3 class="step-title" style="font-weight:700;color:white;font-size:0.95rem;">Create a New Workspace</h3>
+            </div>
+            <div style="font-size:0.85rem;color:rgba(255,255,255,0.55);line-height:1.7;space-y:8px;">
+              <p style="margin-bottom:8px;">In Postman, create a <strong style="color:white;">Blank Workspace</strong> and name it using this format:</p>
+              <div class="code-box" style="padding:10px 14px;margin-bottom:12px;">Your Name — Intergalactic Banking</div>
+              <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:6px;">
+                <li style="display:flex;align-items:center;gap:8px;"><span style="color:#FF6C37;">›</span> Set visibility to <strong style="color:white;">Internal</strong></li>
+                <li style="display:flex;align-items:center;gap:8px;"><span style="color:#FF6C37;">›</span> Set access to <strong style="color:white;">Everyone in the Team</strong></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="step-item" id="si-w1s2" style="padding:20px;margin-bottom:0;">
+        <div style="display:flex;align-items:flex-start;gap:14px;">
+          <input type="checkbox" class="step-check" id="w1s2" onchange="handleCheck(this,'w1s2')">
+          <div style="flex:1;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+              <div class="step-num" style="background:rgba(255,108,55,0.15);color:#FF6C37;">2</div>
+              <h3 class="step-title" style="font-weight:700;color:white;font-size:0.95rem;">Fork the Collection</h3>
+            </div>
+            <div style="font-size:0.85rem;color:rgba(255,255,255,0.55);line-height:1.7;">
+              <p style="margin-bottom:10px;">Fork <strong style="color:white;">[Do It Yourself] Intergalactic Bank API</strong> from the public workspace into your newly created workspace:</p>
+              <a href="https://postman.com/devrel/ai-powered-api-mcp-bootcamp" target="_blank" style="display:inline-flex;align-items:center;gap:6px;color:#FF6C37;font-size:0.8rem;text-decoration:none;background:rgba(255,108,55,0.08);border:1px solid rgba(255,108,55,0.2);border-radius:6px;padding:5px 12px;margin-bottom:12px;" onmouseover="this.style.background='rgba(255,108,55,0.15)'" onmouseout="this.style.background='rgba(255,108,55,0.08)'">
+                🔗 postman.com/devrel/ai-powered-api-mcp-bootcamp
+              </a>
+              <div class="note-box" style="padding:10px 14px;font-size:0.8rem;display:flex;gap:8px;">
+                <span>📝</span>
+                <span><strong style="color:#F59E0B;">Note:</strong> You may need the <strong style="color:white;">Postman Desktop Agent</strong>. Navigate to the bottom-right corner, find the Desktop Agent icon, and toggle on <strong style="color:white;">Auto Select</strong> and <strong style="color:white;">Desktop Agent</strong>.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════
+     WORKFLOW 2 — AGENT MODE
+═══════════════════════════════════════ -->
+<section id="workflow-2" style="padding:40px 24px;max-width:900px;margin:0 auto;">
+  <div class="glass-card" style="border-radius:20px;overflow:hidden;border-left:4px solid #8B5CF6;">
+    <div onclick="toggleWF('wf2')" style="padding:24px 28px;display:flex;align-items:center;gap:16px;cursor:pointer;user-select:none;">
+      <div style="width:56px;height:56px;background:rgba(139,92,246,0.12);border:1px solid rgba(139,92,246,0.25);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;">🤖</div>
+      <div style="flex:1;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+          <span style="font-size:0.7rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#8B5CF6;">Workflow 2</span>
+          <span style="font-size:0.7rem;padding:2px 8px;border-radius:4px;background:rgba(139,92,246,0.12);color:#8B5CF6;">5 steps</span>
+          <span id="wf2-done-badge" style="font-size:0.7rem;padding:2px 8px;border-radius:4px;background:rgba(16,185,129,0.1);color:#10B981;display:none;">✓ Done</span>
+        </div>
+        <h2 style="font-size:1.25rem;font-weight:800;color:white;">Working with Agent Mode</h2>
+      </div>
+      <div id="wf2-chevron" class="chevron" style="color:rgba(255,255,255,0.3);font-size:18px;">▼</div>
+    </div>
+
+    <div id="wf2" class="wf-steps open" style="padding:0 28px 28px;">
+
+      <!-- Step 1 -->
+      <div class="step-item" id="si-w2s1" style="padding:20px;margin-bottom:12px;">
+        <div style="display:flex;align-items:flex-start;gap:14px;">
+          <input type="checkbox" class="step-check" id="w2s1" onchange="handleCheck(this,'w2s1')">
+          <div style="flex:1;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+              <div class="step-num" style="background:rgba(139,92,246,0.15);color:#8B5CF6;">1</div>
+              <h3 class="step-title" style="font-weight:700;color:white;font-size:0.95rem;">Set Up Agent Mode &amp; Create Environment</h3>
+            </div>
+            <div style="font-size:0.85rem;color:rgba(255,255,255,0.55);line-height:1.7;">
+              <ul style="list-style:none;padding:0;margin:0 0 12px 0;display:flex;flex-direction:column;gap:6px;">
+                <li style="display:flex;align-items:center;gap:8px;"><span style="color:#8B5CF6;">›</span> Select <strong style="color:white;">Claude Sonnet 4.6</strong> as your model</li>
+                <li style="display:flex;align-items:center;gap:8px;"><span style="color:#8B5CF6;">›</span> Configure Agent Mode to <strong style="color:white;">Auto Run</strong></li>
+                <li style="display:flex;align-items:center;gap:8px;"><span style="color:#8B5CF6;">›</span> Set the <strong style="color:white;">Collection as context</strong>, then send this prompt:</li>
+              </ul>
+              <div class="agent-box" style="padding:14px 16px;margin-bottom:12px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                  <span style="font-size:0.68rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#FF6C37;">🤖 Agent Mode Prompt</span>
+                  <button class="copy-btn" onclick="copyText('p-w2s1', this)">Copy</button>
+                </div>
+                <p id="p-w2s1" style="color:rgba(255,255,255,0.8);margin:0;">Create an Environment Variable file called Banking.local</p>
+              </div>
+              <p style="color:rgba(255,255,255,0.45);">Switch to your new environment using the <strong style="color:white;">Environment Selector</strong> dropdown in the top right corner.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="step-item" id="si-w2s2" style="padding:20px;margin-bottom:12px;">
+        <div style="display:flex;align-items:flex-start;gap:14px;">
+          <input type="checkbox" class="step-check" id="w2s2" onchange="handleCheck(this,'w2s2')">
+          <div style="flex:1;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+              <div class="step-num" style="background:rgba(139,92,246,0.15);color:#8B5CF6;">2</div>
+              <h3 class="step-title" style="font-weight:700;color:white;font-size:0.95rem;">Set the Base URL as a Collection Variable</h3>
+            </div>
+            <div style="font-size:0.85rem;color:rgba(255,255,255,0.55);line-height:1.7;">
+              <p style="margin-bottom:10px;">Ensure the <strong style="color:white;">Collection is set as context</strong>, then send:</p>
+              <div class="agent-box" style="padding:14px 16px;margin-bottom:12px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                  <span style="font-size:0.68rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#FF6C37;">🤖 Agent Mode Prompt</span>
+                  <button class="copy-btn" onclick="copyText('p-w2s2', this)">Copy</button>
+                </div>
+                <p id="p-w2s2" style="color:rgba(255,255,255,0.8);margin:0;">For all the requests in this collection, add https://template.postman-echo.com as an environment variable called baseUrl and update all the URLs in the collection to use {{baseUrl}}.</p>
+              </div>
+              <div class="tip-box" style="padding:10px 14px;font-size:0.8rem;display:flex;gap:8px;">
+                <span>💡</span>
+                <span><strong style="color:#06B6D4;">Tip:</strong> Verify that the <code style="background:rgba(255,255,255,0.08);padding:1px 5px;border-radius:3px;">baseUrl</code> variable has been automatically populated in the <strong style="color:white;">Variables tab</strong>.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="step-item" id="si-w2s3" style="padding:20px;margin-bottom:12px;">
+        <div style="display:flex;align-items:flex-start;gap:14px;">
+          <input type="checkbox" class="step-check" id="w2s3" onchange="handleCheck(this,'w2s3')">
+          <div style="flex:1;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+              <div class="step-num" style="background:rgba(139,92,246,0.15);color:#8B5CF6;">3</div>
+              <h3 class="step-title" style="font-weight:700;color:white;font-size:0.95rem;">Set the API Key as an Environment Variable</h3>
+            </div>
+            <div style="font-size:0.85rem;color:rgba(255,255,255,0.55);line-height:1.7;">
+              <ul style="list-style:none;padding:0;margin:0 0 10px 0;display:flex;flex-direction:column;gap:6px;">
+                <li style="display:flex;align-items:center;gap:8px;"><span style="color:#8B5CF6;">›</span> Send the <strong style="color:white;">Generate API Key</strong> GET request</li>
+                <li style="display:flex;align-items:center;gap:8px;"><span style="color:#8B5CF6;">›</span> Verify that the environment variable has been set in the <strong style="color:white;">Environment tab</strong></li>
+              </ul>
+              <div class="tip-box" style="padding:10px 14px;font-size:0.8rem;display:flex;gap:8px;">
+                <span>💡</span>
+                <span><strong style="color:#06B6D4;">Tip — Mark as Sensitive:</strong> Go to your Environments on the side panel and set the <code style="background:rgba(255,255,255,0.08);padding:1px 5px;border-radius:3px;">apiKey</code> value to <strong style="color:white;">sensitive</strong>.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 4 -->
+      <div class="step-item" id="si-w2s4" style="padding:20px;margin-bottom:12px;">
+        <div style="display:flex;align-items:flex-start;gap:14px;">
+          <input type="checkbox" class="step-check" id="w2s4" onchange="handleCheck(this,'w2s4')">
+          <div style="flex:1;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+              <div class="step-num" style="background:rgba(139,92,246,0.15);color:#8B5CF6;">4</div>
+              <h3 class="step-title" style="font-weight:700;color:white;font-size:0.95rem;">Add Post-Request Scripts to fromAccount &amp; toAccount</h3>
+            </div>
+            <div style="font-size:0.85rem;color:rgba(255,255,255,0.55);line-height:1.7;">
+              <p style="margin-bottom:10px;">Set the <strong style="color:white;">fromAccount</strong> request as context and send:</p>
+              <div class="agent-box" style="padding:14px 16px;margin-bottom:12px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                  <span style="font-size:0.68rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#FF6C37;">🤖 Agent Mode Prompt — fromAccount</span>
+                  <button class="copy-btn" onclick="copyText('p-w2s4a', this)">Copy</button>
+                </div>
+                <p id="p-w2s4a" style="color:rgba(255,255,255,0.8);margin:0;">Programmatically add a post-response script that parses the response body, reads the accountId field, and saves its value as an environment variable called fromAccount in the Banking.local environment.</p>
+              </div>
+              <p style="margin-bottom:10px;">Set the <strong style="color:white;">toAccount</strong> request as context and send:</p>
+              <div class="agent-box" style="padding:14px 16px;margin-bottom:12px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                  <span style="font-size:0.68rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#FF6C37;">🤖 Agent Mode Prompt — toAccount</span>
+                  <button class="copy-btn" onclick="copyText('p-w2s4b', this)">Copy</button>
+                </div>
+                <p id="p-w2s4b" style="color:rgba(255,255,255,0.8);margin:0;">Programmatically add a post-response script that parses the response body, reads the accountId field, and saves its value as an environment variable called toAccount in the Banking.local environment.</p>
+              </div>
+              <p style="color:rgba(255,255,255,0.4);">Send both requests, then send <strong style="color:white;">GET List All Accounts</strong> to view the randomly generated accounts.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 5 -->
+      <div class="step-item" id="si-w2s5" style="padding:20px;margin-bottom:0;">
+        <div style="display:flex;align-items:flex-start;gap:14px;">
+          <input type="checkbox" class="step-check" id="w2s5" onchange="handleCheck(this,'w2s5')">
+          <div style="flex:1;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+              <div class="step-num" style="background:rgba(139,92,246,0.15);color:#8B5CF6;">5</div>
+              <h3 class="step-title" style="font-weight:700;color:white;font-size:0.95rem;">Add Post-Request Script to New Transaction</h3>
+            </div>
+            <div style="font-size:0.85rem;color:rgba(255,255,255,0.55);line-height:1.7;">
+              <p style="margin-bottom:10px;">Set the <strong style="color:white;">Create new transaction</strong> request as context and send:</p>
+              <div class="agent-box" style="padding:14px 16px;margin-bottom:12px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                  <span style="font-size:0.68rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#FF6C37;">🤖 Agent Mode Prompt</span>
+                  <button class="copy-btn" onclick="copyText('p-w2s5', this)">Copy</button>
+                </div>
+                <p id="p-w2s5" style="color:rgba(255,255,255,0.8);margin:0;">Programmatically add a post-response script that parses the response body, reads the transactionId field, and saves its value as an environment variable called transactionId in the Banking.local environment.</p>
+              </div>
+              <p style="color:rgba(255,255,255,0.4);">Send the request to see the ID populated. Now send <strong style="color:white;">GET Transaction by ID</strong> — you should see a <span style="color:#10B981;font-weight:600;">200 OK</span> response. 🎉</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════
+     WORKFLOW 3 — TESTING & AUTOMATION
+═══════════════════════════════════════ -->
+<section id="workflow-3" style="padding:40px 24px;max-width:900px;margin:0 auto;">
+  <div class="glass-card" style="border-radius:20px;overflow:hidden;border-left:4px solid #06B6D4;">
+    <div onclick="toggleWF('wf3')" style="padding:24px 28px;display:flex;align-items:center;gap:16px;cursor:pointer;user-select:none;">
+      <div style="width:56px;height:56px;background:rgba(6,182,212,0.12);border:1px solid rgba(6,182,212,0.25);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;">🧪</div>
+      <div style="flex:1;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+          <span style="font-size:0.7rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#06B6D4;">Workflow 3</span>
+          <span style="font-size:0.7rem;padding:2px 8px;border-radius:4px;background:rgba(6,182,212,0.12);color:#06B6D4;">2 steps</span>
+          <span id="wf3-done-badge" style="font-size:0.7rem;padding:2px 8px;border-radius:4px;background:rgba(16,185,129,0.1);color:#10B981;display:none;">✓ Done</span>
+        </div>
+        <h2 style="font-size:1.25rem;font-weight:800;color:white;">Testing and Automation</h2>
+      </div>
+      <div id="wf3-chevron" class="chevron" style="color:rgba(255,255,255,0.3);font-size:18px;">▼</div>
+    </div>
+
+    <div id="wf3" class="wf-steps open" style="padding:0 28px 28px;">
+
+      <!-- Step 1 -->
+      <div class="step-item" id="si-w3s1" style="padding:20px;margin-bottom:12px;">
+        <div style="display:flex;align-items:flex-start;gap:14px;">
+          <input type="checkbox" class="step-check" id="w3s1" onchange="handleCheck(this,'w3s1')">
+          <div style="flex:1;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+              <div class="step-num" style="background:rgba(6,182,212,0.15);color:#06B6D4;">1</div>
+              <h3 class="step-title" style="font-weight:700;color:white;font-size:0.95rem;">Write Tests with Agent Mode</h3>
+            </div>
+            <div style="font-size:0.85rem;color:rgba(255,255,255,0.55);line-height:1.7;">
+              <p style="margin-bottom:10px;">Once your full API request workflow is producing expected happy-path responses, set the <strong style="color:white;">Collection as context</strong> and send:</p>
+              <div class="agent-box" style="padding:14px 16px;margin-bottom:0;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                  <span style="font-size:0.68rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#FF6C37;">🤖 Agent Mode Prompt</span>
+                  <button class="copy-btn" onclick="copyText('p-w3s1', this)">Copy</button>
+                </div>
+                <p id="p-w3s1" style="color:rgba(255,255,255,0.8);margin:0;">Write tests for all the requests in this collection. Include only status code tests and response time tests.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="step-item" id="si-w3s2" style="padding:20px;margin-bottom:0;">
+        <div style="display:flex;align-items:flex-start;gap:14px;">
+          <input type="checkbox" class="step-check" id="w3s2" onchange="handleCheck(this,'w3s2')">
+          <div style="flex:1;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+              <div class="step-num" style="background:rgba(6,182,212,0.15);color:#06B6D4;">2</div>
+              <h3 class="step-title" style="font-weight:700;color:white;font-size:0.95rem;">Run the Collection Runner</h3>
+            </div>
+            <div style="font-size:0.85rem;color:rgba(255,255,255,0.55);line-height:1.7;">
+              <p style="margin-bottom:10px;">Walk through the <strong style="color:white;">Collection Runner</strong> interface. Demonstrate how to execute all requests in sequence and review results in the Test Results panel. Then use Agent Mode:</p>
+              <div class="agent-box" style="padding:14px 16px;margin-bottom:0;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                  <span style="font-size:0.68rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#FF6C37;">🤖 Agent Mode Prompt</span>
+                  <button class="copy-btn" onclick="copyText('p-w3s2', this)">Copy</button>
+                </div>
+                <p id="p-w3s2" style="color:rgba(255,255,255,0.8);margin:0;">Run all tests using the Collection Runner.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════
+     WORKFLOW 4 — MCP SERVER (OPTIONAL)
+═══════════════════════════════════════ -->
+<section id="workflow-4" style="padding:40px 24px;max-width:900px;margin:0 auto;">
+  <div class="glass-card" style="border-radius:20px;overflow:hidden;border-left:4px solid #F59E0B;">
+    <div onclick="toggleWF('wf4')" style="padding:24px 28px;display:flex;align-items:center;gap:16px;cursor:pointer;user-select:none;">
+      <div style="width:56px;height:56px;background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.25);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;">⚙️</div>
+      <div style="flex:1;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+          <span style="font-size:0.7rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#F59E0B;">Workflow 4</span>
+          <span style="font-size:0.7rem;padding:2px 8px;border-radius:4px;background:rgba(245,158,11,0.12);color:#F59E0B;">3 steps</span>
+          <span style="font-size:0.7rem;padding:2px 8px;border-radius:4px;background:rgba(245,158,11,0.08);color:rgba(245,158,11,0.6);border:1px solid rgba(245,158,11,0.2);">Optional</span>
+          <span id="wf4-done-badge" style="font-size:0.7rem;padding:2px 8px;border-radius:4px;background:rgba(16,185,129,0.1);color:#10B981;display:none;">✓ Done</span>
+        </div>
+        <h2 style="font-size:1.25rem;font-weight:800;color:white;">Connect the Postman MCP Server</h2>
+      </div>
+      <div id="wf4-chevron" class="chevron" style="color:rgba(255,255,255,0.3);font-size:18px;">▼</div>
+    </div>
+
+    <div id="wf4" class="wf-steps" style="padding:0 28px 28px;">
+
+      <!-- Step 1 -->
+      <div class="step-item" id="si-w4s1" style="padding:20px;margin-bottom:12px;">
+        <div style="display:flex;align-items:flex-start;gap:14px;">
+          <input type="checkbox" class="step-check" id="w4s1" onchange="handleCheck(this,'w4s1')">
+          <div style="flex:1;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+              <div class="step-num" style="background:rgba(245,158,11,0.15);color:#F59E0B;">1</div>
+              <h3 class="step-title" style="font-weight:700;color:white;font-size:0.95rem;">Generate Your Postman API Key</h3>
+            </div>
+            <div style="font-size:0.85rem;color:rgba(255,255,255,0.55);line-height:1.7;">
+              <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:6px;">
+                <li style="display:flex;align-items:center;gap:8px;"><span style="color:#F59E0B;">›</span> Click your <strong style="color:white;">user icon</strong> in the top right → <strong style="color:white;">Settings</strong> → <strong style="color:white;">API Keys</strong></li>
+                <li style="display:flex;align-items:center;gap:8px;"><span style="color:#F59E0B;">›</span> Generate a new key and name it <strong style="color:white;">Workshop</strong></li>
+                <li style="display:flex;align-items:center;gap:8px;"><span style="color:#F59E0B;">›</span> Copy the key and store it somewhere safe — you will <strong style="color:#EC4899;">not</strong> be able to view it again</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="step-item" id="si-w4s2" style="padding:20px;margin-bottom:12px;">
+        <div style="display:flex;align-items:flex-start;gap:14px;">
+          <input type="checkbox" class="step-check" id="w4s2" onchange="handleCheck(this,'w4s2')">
+          <div style="flex:1;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+              <div class="step-num" style="background:rgba(245,158,11,0.15);color:#F59E0B;">2</div>
+              <h3 class="step-title" style="font-weight:700;color:white;font-size:0.95rem;">Create an MCP Request</h3>
+            </div>
+            <div style="font-size:0.85rem;color:rgba(255,255,255,0.55);line-height:1.7;">
+              <ul style="list-style:none;padding:0;margin:0 0 10px 0;display:flex;flex-direction:column;gap:6px;">
+                <li style="display:flex;align-items:center;gap:8px;"><span style="color:#F59E0B;">›</span> Return to your <strong style="color:white;">Intergalactic Banking</strong> workspace and select <strong style="color:white;">MCP Request</strong></li>
+                <li style="display:flex;align-items:center;gap:8px;"><span style="color:#F59E0B;">›</span> Set transport type to <strong style="color:white;">HTTP</strong></li>
+                <li style="display:flex;align-items:center;gap:8px;"><span style="color:#F59E0B;">›</span> MCP Server URL:</li>
+              </ul>
+              <div class="code-box" style="padding:10px 14px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;">
+                <span id="mcp-url" style="color:#06B6D4;">https://mcp.postman.com/mcp</span>
+                <button class="copy-btn" onclick="copyText('mcp-url', this)">Copy</button>
+              </div>
+              <p>Set authentication type to <strong style="color:white;">Bearer Token</strong> and enter your API key.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="step-item" id="si-w4s3" style="padding:20px;margin-bottom:0;">
+        <div style="display:flex;align-items:flex-start;gap:14px;">
+          <input type="checkbox" class="step-check" id="w4s3" onchange="handleCheck(this,'w4s3')">
+          <div style="flex:1;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+              <div class="step-num" style="background:rgba(245,158,11,0.15);color:#F59E0B;">3</div>
+              <h3 class="step-title" style="font-weight:700;color:white;font-size:0.95rem;">Get Collections Using MCP Server</h3>
+            </div>
+            <div style="font-size:0.85rem;color:rgba(255,255,255,0.55);line-height:1.7;">
+              <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:6px;">
+                <li style="display:flex;align-items:center;gap:8px;"><span style="color:#F59E0B;">›</span> Navigate to <strong style="color:white;">Tool 49 — getCollection</strong></li>
+                <li style="display:flex;align-items:center;gap:8px;"><span style="color:#F59E0B;">›</span> Run the request using your <strong style="color:white;">Workspace ID</strong></li>
+                <li style="display:flex;align-items:center;gap:8px;"><span style="color:#F59E0B;">›</span> Find your Workspace ID in the <strong style="color:white;">Overview tab</strong></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════
+     CLAUDE CODE — OPTIONAL
+═══════════════════════════════════════ -->
+<section id="claude-code" style="padding:40px 24px;max-width:900px;margin:0 auto;">
+  <div class="glass-card" style="border-radius:20px;overflow:hidden;border-left:4px solid #10B981;">
+    <div onclick="toggleWF('wfc')" style="padding:24px 28px;display:flex;align-items:center;gap:16px;cursor:pointer;user-select:none;">
+      <div style="width:56px;height:56px;background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.25);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;">💻</div>
+      <div style="flex:1;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+          <span style="font-size:0.7rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#10B981;">Bonus</span>
+          <span style="font-size:0.7rem;padding:2px 8px;border-radius:4px;background:rgba(16,185,129,0.12);color:#10B981;">3 steps</span>
+          <span style="font-size:0.7rem;padding:2px 8px;border-radius:4px;background:rgba(16,185,129,0.08);color:rgba(16,185,129,0.6);border:1px solid rgba(16,185,129,0.2);">Optional</span>
+          <span id="wfc-done-badge" style="font-size:0.7rem;padding:2px 8px;border-radius:4px;background:rgba(16,185,129,0.1);color:#10B981;display:none;">✓ Done</span>
+        </div>
+        <h2 style="font-size:1.25rem;font-weight:800;color:white;">Claude Code + Postman MCP</h2>
+      </div>
+      <div id="wfc-chevron" class="chevron" style="color:rgba(255,255,255,0.3);font-size:18px;">▼</div>
+    </div>
+
+    <div id="wfc" class="wf-steps" style="padding:0 28px 28px;">
+
+      <!-- Step 1 -->
+      <div class="step-item" id="si-wcs1" style="padding:20px;margin-bottom:12px;">
+        <div style="display:flex;align-items:flex-start;gap:14px;">
+          <input type="checkbox" class="step-check" id="wcs1" onchange="handleCheck(this,'wcs1')">
+          <div style="flex:1;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+              <div class="step-num" style="background:rgba(16,185,129,0.15);color:#10B981;">1</div>
+              <h3 class="step-title" style="font-weight:700;color:white;font-size:0.95rem;">Add the MCP Server to Claude Code</h3>
+            </div>
+            <div style="font-size:0.85rem;color:rgba(255,255,255,0.55);line-height:1.7;">
+              <p style="margin-bottom:10px;">Run this command in your terminal to register the Postman MCP Server with Claude Code:</p>
+              <div class="code-box" style="padding:14px 16px;margin-bottom:12px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                  <span style="font-size:0.68rem;color:rgba(255,255,255,0.3);">💻 Terminal</span>
+                  <button class="copy-btn" onclick="copyText('p-wcs1', this)">Copy</button>
+                </div>
+                <pre id="p-wcs1" style="color:#10B981;margin:0;white-space:pre-wrap;font-size:0.78rem;">claude mcp add --transport http postman \
+  https://mcp.postman.com/mcp \
+  --header "Authorization: Bearer &lt;YOUR_API_KEY&gt;"</pre>
+              </div>
+              <p style="margin-bottom:8px;">Expected <code style="background:rgba(255,255,255,0.08);padding:1px 5px;border-radius:3px;">mcp.json</code> configuration:</p>
+              <div class="code-box" style="padding:14px 16px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                  <span style="font-size:0.68rem;color:rgba(255,255,255,0.3);">📄 mcp.json</span>
+                  <button class="copy-btn" onclick="copyText('p-wcs1b', this)">Copy</button>
+                </div>
+                <pre id="p-wcs1b" style="color:rgba(255,255,255,0.7);margin:0;font-size:0.78rem;">{
+  "mcpServers": {
+    "postman_mcp_server": {
+      "url": "https://mcp.postman.com/mcp",
+      "headers": {
+        "Authorization": "Bearer PMAK-YOUR-KEY-HERE"
+      }
+    }
+  }
+}</pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="step-item" id="si-wcs2" style="padding:20px;margin-bottom:12px;">
+        <div style="display:flex;align-items:flex-start;gap:14px;">
+          <input type="checkbox" class="step-check" id="wcs2" onchange="handleCheck(this,'wcs2')">
+          <div style="flex:1;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+              <div class="step-num" style="background:rgba(16,185,129,0.15);color:#10B981;">2</div>
+              <h3 class="step-title" style="font-weight:700;color:white;font-size:0.95rem;">Verify the Connection</h3>
+            </div>
+            <div style="font-size:0.85rem;color:rgba(255,255,255,0.55);line-height:1.7;">
+              <p style="margin-bottom:10px;">Run <code style="background:rgba(255,255,255,0.08);padding:1px 6px;border-radius:3px;color:#10B981;">claude mcp list</code> or type <code style="background:rgba(255,255,255,0.08);padding:1px 6px;border-radius:3px;color:#8B5CF6;">/mcp</code> in Claude to list registered MCP servers. Then verify with:</p>
+              <div class="claude-box" style="padding:14px 16px;margin-bottom:0;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                  <span style="font-size:0.68rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#8B5CF6;">🤖 Claude Prompt</span>
+                  <button class="copy-btn" onclick="copyText('p-wcs2', this)">Copy</button>
+                </div>
+                <p id="p-wcs2" style="color:rgba(255,255,255,0.8);margin:0;">List all my Postman workspaces.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="step-item" id="si-wcs3" style="padding:20px;margin-bottom:0;">
+        <div style="display:flex;align-items:flex-start;gap:14px;">
+          <input type="checkbox" class="step-check" id="wcs3" onchange="handleCheck(this,'wcs3')">
+          <div style="flex:1;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+              <div class="step-num" style="background:rgba(16,185,129,0.15);color:#10B981;">3</div>
+              <h3 class="step-title" style="font-weight:700;color:white;font-size:0.95rem;">Add Tests via the MCP Server</h3>
+            </div>
+            <div style="font-size:0.85rem;color:rgba(255,255,255,0.55);line-height:1.7;">
+              <p style="margin-bottom:10px;">Get your workspace ID:</p>
+              <div class="claude-box" style="padding:14px 16px;margin-bottom:12px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                  <span style="font-size:0.68rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#8B5CF6;">🤖 Claude Prompt</span>
+                  <button class="copy-btn" onclick="copyText('p-wcs3a', this)">Copy</button>
+                </div>
+                <p id="p-wcs3a" style="color:rgba(255,255,255,0.8);margin:0;">Get the workspace ID for "[WORKSHOP-WORKSPACE-NAME]".</p>
+              </div>
+              <p style="margin-bottom:10px;">Add tests to the collection:</p>
+              <div class="claude-box" style="padding:14px 16px;margin-bottom:12px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                  <span style="font-size:0.68rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#8B5CF6;">🤖 Claude Prompt</span>
+                  <button class="copy-btn" onclick="copyText('p-wcs3b', this)">Copy</button>
+                </div>
+                <p id="p-wcs3b" style="color:rgba(255,255,255,0.8);margin:0;">Using the Postman MCP server, add tests to [workshop collection name]. For each request: 1. Add a status code check (200 OK) 2. Validate the response has a 'success' property set to true</p>
+              </div>
+              <p style="margin-bottom:10px;">Run the tests:</p>
+              <div class="claude-box" style="padding:14px 16px;margin-bottom:0;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                  <span style="font-size:0.68rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#8B5CF6;">🤖 Claude Prompt</span>
+                  <button class="copy-btn" onclick="copyText('p-wcs3c', this)">Copy</button>
+                </div>
+                <p id="p-wcs3c" style="color:rgba(255,255,255,0.8);margin:0;">Run the "[workshop collection name]" collection and show me the test results.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════
+     COMPLETION BANNER
+═══════════════════════════════════════ -->
+<section id="completion" style="padding:80px 24px;max-width:900px;margin:0 auto;text-align:center;display:none;">
+  <div class="glass-card" style="border-radius:24px;padding:60px 40px;background:linear-gradient(135deg, rgba(255,108,55,0.08), rgba(139,92,246,0.08));">
+    <div style="font-size:4rem;margin-bottom:16px;">🚀</div>
+    <h2 style="font-size:2.5rem;font-weight:900;margin-bottom:12px;" class="grad-full">Mission Complete!</h2>
+    <p style="color:rgba(255,255,255,0.55);font-size:1rem;max-width:480px;margin:0 auto 28px;line-height:1.7;">You've built and tested an Intergalactic Banking API end-to-end with Postman Agent Mode and MCP. These techniques are ready for your real-world projects.</p>
+    <div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:center;">
+      <a href="https://postman.com" target="_blank" style="background:linear-gradient(135deg,#FF6C37,#EC4899);color:white;padding:12px 24px;border-radius:10px;font-weight:700;font-size:0.88rem;text-decoration:none;">Explore Postman →</a>
+      <button onclick="resetProgress()" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.14);color:rgba(255,255,255,0.7);padding:12px 24px;border-radius:10px;font-weight:600;font-size:0.88rem;cursor:pointer;">Reset Progress</button>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════
+     FOOTER
+═══════════════════════════════════════ -->
+<footer style="padding:40px 24px;text-align:center;border-top:1px solid rgba(139,92,246,0.12);margin-top:40px;">
+  <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:12px;">
+    <div class="hexagon" style="width:28px;height:28px;background:#FF6C37;display:flex;align-items:center;justify-content:center;font-weight:900;color:white;font-size:12px;">P</div>
+    <span style="color:rgba(255,255,255,0.35);font-size:0.82rem;">AI-Powered API &amp; MCP Bootcamp · Built with Postman</span>
+  </div>
+  <p style="color:rgba(255,255,255,0.2);font-size:0.75rem;">#PostmanBootcamp · 60 Minutes · Hands-On · No LLM Exp. Required</p>
+</footer>
+
+
+<!-- ═══════════════════════════════════════
+     JAVASCRIPT
+═══════════════════════════════════════ -->
+<script>
+  /* ── CONSTANTS ── */
+  const STORAGE_KEY = 'bootcamp_v1_progress';
+  const ALL_STEPS = ['w1s1','w1s2','w2s1','w2s2','w2s3','w2s4','w2s5','w3s1','w3s2','w4s1','w4s2','w4s3','wcs1','wcs2','wcs3'];
+  const WF_STEPS = {
+    wf1: ['w1s1','w1s2'],
+    wf2: ['w2s1','w2s2','w2s3','w2s4','w2s5'],
+    wf3: ['w3s1','w3s2'],
+    wf4: ['w4s1','w4s2','w4s3'],
+    wfc: ['wcs1','wcs2','wcs3']
+  };
+
+  let completed = new Set();
+
+  /* ── LOAD SAVED PROGRESS ── */
+  function loadProgress() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+      saved.forEach(id => completed.add(id));
+    } catch(e) {}
+
+    ALL_STEPS.forEach(id => {
+      const cb = document.getElementById(id);
+      if (cb && completed.has(id)) {
+        cb.checked = true;
+        const si = document.getElementById('si-' + id.replace(/^w/, 'w'));
+        if (si) si.classList.add('done');
+      }
+    });
+
+    updateProgress();
+  }
+
+  /* ── HANDLE CHECKBOX CHANGE ── */
+  function handleCheck(cb, id) {
+    const si = cb.closest('.step-item');
+    if (cb.checked) {
+      completed.add(id);
+      if (si) si.classList.add('done');
+    } else {
+      completed.delete(id);
+      if (si) si.classList.remove('done');
+    }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify([...completed]));
+    updateProgress();
+  }
+
+  /* ── UPDATE PROGRESS BAR ── */
+  function updateProgress() {
+    const total = ALL_STEPS.length;
+    const done = ALL_STEPS.filter(id => completed.has(id)).length;
+    const pct = Math.round((done / total) * 100);
+
+    document.getElementById('progress-fill').style.width = pct + '%';
+    document.getElementById('progress-counter').textContent = done + ' / ' + total;
+
+    // Workflow done badges
+    Object.entries(WF_STEPS).forEach(([wfId, steps]) => {
+      const allDone = steps.every(s => completed.has(s));
+      const badge = document.getElementById(wfId + '-done-badge');
+      if (badge) badge.style.display = allDone ? 'inline-flex' : 'none';
+    });
+
+    // Show completion
+    if (done === total) {
+      document.getElementById('completion').style.display = 'block';
+      triggerCelebration();
+    }
+  }
+
+  /* ── TOGGLE WORKFLOW ACCORDION ── */
+  function toggleWF(id) {
+    const el = document.getElementById(id);
+    const chevron = document.getElementById(id + '-chevron');
+    if (!el) return;
+    el.classList.toggle('open');
+    if (chevron) chevron.classList.toggle('rotated');
+  }
+
+  /* ── COPY TO CLIPBOARD ── */
+  function copyText(id, btn) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const text = el.innerText || el.textContent;
+    navigator.clipboard.writeText(text.trim()).then(() => {
+      if (btn) {
+        const orig = btn.textContent;
+        btn.textContent = '✓ Copied!';
+        btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = orig; btn.classList.remove('copied'); }, 2000);
+      }
+    }).catch(() => {
+      // fallback
+      const ta = document.createElement('textarea');
+      ta.value = text.trim();
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      if (btn) {
+        const orig = btn.textContent;
+        btn.textContent = '✓ Copied!';
+        btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = orig; btn.classList.remove('copied'); }, 2000);
+      }
+    });
+  }
+
+  /* ── RESET PROGRESS ── */
+  function resetProgress() {
+    completed.clear();
+    localStorage.removeItem(STORAGE_KEY);
+    ALL_STEPS.forEach(id => {
+      const cb = document.getElementById(id);
+      if (cb) cb.checked = false;
+    });
+    document.querySelectorAll('.step-item.done').forEach(el => el.classList.remove('done'));
+    document.getElementById('completion').style.display = 'none';
+    updateProgress();
+  }
+
+  /* ── CELEBRATION CONFETTI ── */
+  const CONFETTI_COLORS = ['#FF6C37','#EC4899','#8B5CF6','#06B6D4','#F59E0B','#10B981'];
+  function triggerCelebration() {
+    for (let i = 0; i < 80; i++) {
+      setTimeout(() => {
+        const el = document.createElement('div');
+        el.className = 'confetti-piece';
+        el.style.cssText = `
+          left: ${Math.random() * 100}vw;
+          top: 0;
+          background: ${CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)]};
+          width: ${6 + Math.random() * 8}px;
+          height: ${6 + Math.random() * 8}px;
+          animation-duration: ${2 + Math.random() * 3}s;
+          animation-delay: ${Math.random() * 0.5}s;
+          border-radius: ${Math.random() > 0.5 ? '50%' : '2px'};
+        `;
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 5000);
+      }, i * 30);
+    }
+  }
+
+  /* ── STAR CANVAS ── */
+  function initStars() {
+    const canvas = document.getElementById('hero-canvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+
+    function resize() {
+      canvas.width = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    const stars = Array.from({ length: 180 }, () => ({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      r: Math.random() * 1.8 + 0.3,
+      speed: Math.random() * 0.3 + 0.05,
+      opacity: Math.random() * 0.7 + 0.15,
+      twinkle: Math.random() * Math.PI * 2
+    }));
+
+    // A few slightly larger "bright" stars
+    for (let i = 0; i < 12; i++) {
+      stars.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        r: Math.random() * 2.5 + 1.5,
+        speed: Math.random() * 0.2 + 0.03,
+        opacity: 0.9,
+        twinkle: Math.random() * Math.PI * 2
+      });
+    }
+
+    let frame = 0;
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      frame++;
+
+      stars.forEach(s => {
+        s.twinkle += 0.02;
+        const op = s.opacity * (0.7 + 0.3 * Math.sin(s.twinkle));
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255,255,255,${op})`;
+        ctx.fill();
+
+        s.y -= s.speed;
+        if (s.y + s.r < 0) {
+          s.y = canvas.height + s.r;
+          s.x = Math.random() * canvas.width;
+        }
+      });
+
+      requestAnimationFrame(draw);
+    }
+    draw();
+  }
+
+  /* ── INIT ── */
+  document.addEventListener('DOMContentLoaded', () => {
+    initStars();
+    loadProgress();
+
+    // Smooth reveal on scroll
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.style.opacity = '1';
+          e.target.style.transform = 'translateY(0)';
+        }
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('section').forEach(s => {
+      s.style.opacity = '0';
+      s.style.transform = 'translateY(16px)';
+      s.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+      observer.observe(s);
+    });
+  });
+</script>
+
+</body>
+</html>
